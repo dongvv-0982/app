@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+    <filter>
+        <filter-name>Admin Filter</filter-name>
+        <filter-class>filter.Admin</filter-class>
+    </filter>
+    <filter>
+        <filter-name>Check_login</filter-name>
+        <filter-class>filter.Check_login</filter-class>
+    </filter>
+    <filter>
+        <filter-name>Follow Filter</filter-name>
+        <filter-class>filter.Follow</filter-class>
+    </filter>
+    <filter>
+        <filter-name>Login Filter</filter-name>
+        <filter-class>filter.Login</filter-class>
+    </filter>
+    <filter>
+        <filter-name>Register Filter</filter-name>
+        <filter-class>filter.Register</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>Check_login</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>Register Filter</filter-name>
+        <servlet-name>Register</servlet-name>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
+        <dispatcher>ERROR</dispatcher>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>Login Filter</filter-name>
+        <servlet-name>Login</servlet-name>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
+        <dispatcher>ERROR</dispatcher>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>Follow Filter</filter-name>
+        <servlet-name>Follow</servlet-name>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
+        <dispatcher>ERROR</dispatcher>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>Admin Filter</filter-name>
+        <servlet-name>Admin</servlet-name>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
+        <dispatcher>ERROR</dispatcher>
+    </filter-mapping>
+    <servlet>
+        <servlet-name>Index</servlet-name>
+        <servlet-class>controller.user.Index</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>Admin</servlet-name>
+        <servlet-class>controller.admin.Admin</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>Like</servlet-name>
+        <servlet-class>controller.user.Like</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>Login</servlet-name>
+        <servlet-class>controller.user.Login</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>Logout</servlet-name>
+        <servlet-class>controller.user.Logout</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>Post</servlet-name>
+        <servlet-class>controller.user.Post</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>Profile</servlet-name>
+        <servlet-class>controller.user.Profile</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>Register</servlet-name>
+        <servlet-class>controller.user.Register</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>Report</servlet-name>
+        <servlet-class>controller.user.Report</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>Delete Servlet</servlet-name>
+        <servlet-class>controller.user.Delete</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>Follow</servlet-name>
+        <servlet-class>controller.user.Follow</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>Dashboard Servlet</servlet-name>
+        <servlet-class>controller.user.Dashboard</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Admin</servlet-name>
+        <url-pattern>/admin/home</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Dashboard Servlet</servlet-name>
+        <url-pattern>/user/dashboard</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Delete Servlet</servlet-name>
+        <url-pattern>/user/delete</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Index</servlet-name>
+        <url-pattern>/user/index</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Like</servlet-name>
+        <url-pattern>/user/like</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Login</servlet-name>
+        <url-pattern>/user/login</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Logout</servlet-name>
+        <url-pattern>/user/logout</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Post</servlet-name>
+        <url-pattern>/user/post</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Profile</servlet-name>
+        <url-pattern>/user/profile</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Report</servlet-name>
+        <url-pattern>/user/report</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Follow</servlet-name>
+        <url-pattern>/user/follow</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Register</servlet-name>
+        <url-pattern>/user/register</url-pattern>
+    </servlet-mapping>
+    <session-config>
+        <session-timeout>
+            30
+        </session-timeout>
+    </session-config>
+    <welcome-file-list>
+        <welcome-file>View/index.html</welcome-file>
+    </welcome-file-list>
+</web-app>
