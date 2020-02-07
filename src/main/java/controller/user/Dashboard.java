@@ -6,11 +6,9 @@
 package controller.user;
 
 import dal.ControlDAO;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -21,8 +19,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.parsers.ParserConfigurationException;
 import model.Post;
+import model.User;
 import org.apache.commons.validator.UrlValidator;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -56,9 +54,11 @@ public class Dashboard extends HttpServlet {
         }
         for (Post tweet : tweets) {
             String content = tweet.getContent();
-            List<String> url = extractUrls(content);
+            String [] contents = new String[1];
+            contents[0] = content;
+            List<String> url = extractUrls(contents);
             String curl = null;
-            System.out.println("url : " + (url == null ? "Null url" : url));
+            tweet.setContent(contents[0]);
             UrlValidator validator = new UrlValidator();
             for (String string : url) {
                 if (validator.isValid(string)) {
@@ -84,13 +84,17 @@ public class Dashboard extends HttpServlet {
                 }
 //                System.out.println("result : \n" + result);
                 Document doc = Jsoup.parse(result);
-                 text = getHtmlText(doc);
+                 text = getHtmlText(curl, doc);
                  imgUrl = getImageFromUrl(curl,doc);
+                 System.out.println("img url: " + imgUrl);
             }
             tweet.setImgUrl(imgUrl);
             tweet.setLink(curl);
             tweet.setDescription(text);
         }
+        User user = db.getUser(suser);
+            request.setAttribute("user", user);
+        response.addHeader("HttpOnly", "true");
         request.setAttribute("tweets", tweets);
         request.getRequestDispatcher("../View/dashboard.jsp").forward(request, response);
     }
@@ -134,24 +138,28 @@ public class Dashboard extends HttpServlet {
         return "Short description";
     }// </editor-fold>
 
-    public List<String> extractUrls(String text) {
+    public List<String> extractUrls(String [] text) {
         List<String> containedUrls = new ArrayList<String>();
 //        String urlRegex = "_^(?:(?:https?|ftp)://)(?:\\S+(?::\\S*)?@)?(?:(?!10(?:\\.\\d{1,3}){3})(?!127(?:\\.\\d{1,3}){3})(?!169\\.254(?:\\.\\d{1,3}){2})(?!192\\.168(?:\\.\\d{1,3}){2})(?!172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.\\d{1,3}){2})(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\x{00a1}-\\x{ffff}0-9]+-?)*[a-z\\x{00a1}-\\x{ffff}0-9]+)(?:\\.(?:[a-z\\x{00a1}-\\x{ffff}0-9]+-?)*[a-z\\x{00a1}-\\x{ffff}0-9]+)*(?:\\.(?:[a-z\\x{00a1}-\\x{ffff}]{2,})))(?::\\d{2,5})?(?:/[^\\s]*)?$_iuS";
 //        String urlRegex = "(https?:\\/\\/(?:www\\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s]{2,}|www\\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s]{2,}|https?:\\/\\/(?:www\\.|(?!www))[a-zA-Z0-9]+\\.[^\\s]{2,}|www\\.[a-zA-Z0-9]+\\.[^\\s]{2,})";
         String urlRegex = "(?:(?:https?|ftp|file):\\/\\/|www\\.|ftp\\.)(?:\\([-A-Z0-9+&@#\\/%=~_|$?!:,.]*\\)|[-A-Z0-9+&@#\\/%=~_|$?!:,.])*(?:\\([-A-Z0-9+&@#\\/%=~_|$?!:,.]*\\)|[A-Z0-9+&@#\\/%=~_|$])";
 //        String urlRegex = "((https?|ftp|gopher|telnet|file):((//)|(\\\\))+[\\w\\d:#@%/;$()~_?\\+-=\\\\\\.&]*)";
         Pattern pattern = Pattern.compile(urlRegex, Pattern.CASE_INSENSITIVE);
-        Matcher urlMatcher = pattern.matcher(text);
-        System.out.println("mathcher: " + urlMatcher);
+        Matcher urlMatcher = pattern.matcher(text[0]);
+//        System.out.println("mathcher: " + urlMatcher);
         while (urlMatcher.find()) {
-            containedUrls.add(text.substring(urlMatcher.start(0),
-                    urlMatcher.end(0)));
+            String urls = text[0].substring(urlMatcher.start(0),
+                    urlMatcher.end(0));
+            containedUrls.add(urls);
+           
+            text[0] = text[0].replace(urls, "<a href='"+urls+"'>"+urls+"</a>");
+            
         }
 
         return containedUrls;
     }
 
-    private String getHtmlText(Document doc) {
+    private String getHtmlText(String url, Document doc) {
 
         String desContent;
         try {
@@ -163,14 +171,18 @@ public class Dashboard extends HttpServlet {
                 desContent = null;
             }
         }
+        String  x;
         if(desContent == null){
-            
+            x=url;
         }
-        return desContent;
+        else{x = new String(desContent.getBytes(), Charset.forName("UTF-8"));}
+        
+        return x;
     }
 
     private String getImageFromUrl( String url, Document doc) {
         String imgUrl = "";
+        
         try {
             imgUrl = doc.select("img").get(0).attr("src");
         } catch (NullPointerException | IndexOutOfBoundsException e) {

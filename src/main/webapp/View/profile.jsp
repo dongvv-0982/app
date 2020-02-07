@@ -24,7 +24,8 @@
 
             <h5 class="my-0 mr-md-auto font-weight-normal"><a href="dashboard">Cyber Links</a></h5>
             <nav class="my-2 my-md-0 mr-md-3">
-                <img class="rounded-circle" src="https://api.adorable.io/avatars/285/abott@adorable.png" alt=""
+                <img class="rounded-circle" src='${requestScope.user.imageBase64 == null ?"https://api.adorable.io/avatars/285/abott@adorable.png" : requestScope.user.imageBase64}'
+                                 onerror="this.src='https://api.adorable.io/avatars/285/abott@adorable.png'" alt=""
                      style="height: 32px;">
                 <a class="p-2 text-dark" href="profile">${sessionScope.user}</a>
             </nav>
@@ -36,10 +37,12 @@
                 <div class="row">
                     <div class="col-4">
                         <div class="d-flex flex-column my-3 p-3 bg-white rounded shadow-sm text-center">
-                            <img class="rounded-circle mx-auto" src="https://api.adorable.io/avatars/285/abott@adorable.png" alt=""
+                            <img class="rounded-circle mx-auto" src='${requestScope.user.imageBase64 == null ?"https://api.adorable.io/avatars/285/abott@adorable.png" : requestScope.user.imageBase64}'
+                                 onerror="this.src='https://api.adorable.io/avatars/285/abott@adorable.png'" alt=""
                                  width="64" height="64">
                             <strong class="p-2 text-muted" href="#">@${requestScope.user.username}</strong>
-                            <a class="p-2 text-dark" href="profile">${requestScope.user.name}</a>
+                            <a class="p-2 text-dark" href="profile?
+                               ">${requestScope.user.name}</a>
                             <%
                                 User user = (User) request.getAttribute("user");
                                 String suser = (String) request.getSession().getAttribute("user");
@@ -47,14 +50,16 @@
                                 if (!user.getUsername().equals(suser)) {%>
                             <div id="follow">
                                 <%if (db.isFollow(user.getUsername(), suser)) {%>
-                                <button class="btn btn-outline-primary" onclick="follow('<%=user.getUsername()%>','<%=suser%>',1,${sessionScope.csrf})">Waiting</button>
+                                <button class="btn btn-outline-primary" onclick="follow('<%=user.getUsername()%>','<%=suser%>',1,'${sessionScope.csrf}')">Waiting</button>
                                 <%} else if (db.isFollowed(user.getUsername(), suser)) {%>
 
-                                <button class="btn btn-outline-primary" onclick="follow('<%=user.getUsername()%>','<%=suser%>',1,${sessionScope.csrf})">Followed</button>
+                                <button class="btn btn-outline-primary" onclick="follow('<%=user.getUsername()%>','<%=suser%>',1,'${sessionScope.csrf}')">Followed</button>
                                 <%} else {%>
-                                <button class="btn btn-outline-primary" onclick="follow('<%=user.getUsername()%>','<%=suser%>',0,${sessionScope.csrf})">Follow</button>
+                                <button class="btn btn-outline-primary" onclick="follow('<%=user.getUsername()%>','<%=suser%>',0,'${sessionScope.csrf}')">Follow</button>
                                 <%}%>
                             </div>
+                            <%} else{%>
+                            <a href="upload" class="btn btn-outline-primary">Update Avatar</a>
                             <%}%>
 
                         </div>
@@ -62,13 +67,13 @@
                             <h5 class="mb-5">Follow Requests</h5>
 
                             <%if (user.getUsername().equals(suser)) {%>
-                            <div id="follow">
+                            <div >
                                 <c:forEach items="${requestScope.followers}" var="u">
-                                    <div class="d-flex flex-row mb-2 justify-content-between">
+                                    <div class="d-flex flex-row mb-2 justify-content-between" id="follow${u.username}">
                                         <div class="text-left col-6">${u.name} @${u.username}</div>
                                         <div class="col-6 d-flex flex-row justify-content-end">
-                                            <button class="btn-sm mr-2 btn-primary" onclick="follow('<%=suser%>','${u.username}', 2)">Approve</button>
-                                            <button class="btn-sm btn-danger" onclick="follow('<%=suser%>','${u.username}', 3)">Reject</button>
+                                            <button class="btn-sm mr-2 btn-primary" onclick="follow('<%=suser%>','${u.username}', 2,'${sessionScope.csrf}')">Approve</button>
+                                            <button class="btn-sm btn-danger" onclick="follow('<%=suser%>','${u.username}', 3,'${sessionScope.csrf}')">Reject</button>
                                         </div>
                                     </div>
                                 </c:forEach>
@@ -86,7 +91,8 @@
                             <c:if test="${requestScope.tweets.size() > 0}">
                                 <c:forEach items="${requestScope.tweets}" var="p">
                                     <div class="media text-muted pt-3">
-                                        <img class="rounded-circle mr-2" src="https://api.adorable.io/avatars/285/deptrai@adorable.png" alt=""
+                                        <img class="rounded-circle mr-2" src='${requestScope.user.imageBase64 == null ?"https://api.adorable.io/avatars/285/abott@adorable.png" : requestScope.user.imageBase64}'
+                                 onerror="this.src='https://api.adorable.io/avatars/285/abott@adorable.png'" alt=""
                                              style="height: 32px;">
                                         <p class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
                                             <span class="d-block text-gray-dark"><strong>

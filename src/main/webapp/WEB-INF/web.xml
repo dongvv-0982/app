@@ -104,6 +104,10 @@
         <servlet-name>Dashboard Servlet</servlet-name>
         <servlet-class>controller.user.Dashboard</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>Testupload</servlet-name>
+        <servlet-class>controller.user.Testupload</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>Admin</servlet-name>
         <url-pattern>/admin/home</url-pattern>
@@ -151,6 +155,10 @@
     <servlet-mapping>
         <servlet-name>Register</servlet-name>
         <url-pattern>/user/register</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Testupload</servlet-name>
+        <url-pattern>/user/upload</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

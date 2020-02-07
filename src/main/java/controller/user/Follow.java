@@ -31,6 +31,7 @@ public class Follow extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXx");
         String username = request.getParameter("username");
         String follower = request.getParameter("follower");
         int action = Integer.parseInt(request.getParameter("action"));
@@ -38,6 +39,7 @@ public class Follow extends HttpServlet {
         String ref = request.getHeader("Referer");
         ControlDAO db = new ControlDAO();
         request.getSession().setAttribute("csrf", "");
+        System.out.println("hihihi");
         //action = 0 => add follow
         switch (action) {
             //action == 1 => unfollow
@@ -68,9 +70,12 @@ public class Follow extends HttpServlet {
                             + "                                    </div>");
                 }
                 break;
-            default:
+            case 3:
                 db.acceptFollow(username, follower, 2);
                 break;
+            default:
+                System.out.println("aaa");
+                response.sendError(403);
         }
     }
 

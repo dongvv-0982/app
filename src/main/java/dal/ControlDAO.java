@@ -105,7 +105,7 @@ public class ControlDAO extends DAO{
                 u.setId(rs.getInt(5));
                 u.setTitle(rs.getString(1));
                 u.setContent(rs.getString(2));
-                u.setTypename(rs.getInt(4) == 1 ? "private" : "public");
+                u.setTypename(rs.getInt(4) == 0 ? "private" : "public");
                 u.setAuthor(getUser(rs.getString(3)));
                 u.setLikes(getLikes(rs.getInt(5)));
                 u.setReports(getReports(rs.getInt(5)));
@@ -143,7 +143,7 @@ public class ControlDAO extends DAO{
                 u.setId(rs.getInt(5));
                 u.setTitle(rs.getString(1));
                 u.setContent(rs.getString(2));
-                u.setTypename(rs.getInt(4) == 1 ? "private" : "public");
+                u.setTypename(rs.getInt(4) == 0 ? "private" : "public");
                 u.setAuthor(getUser(rs.getString(3)));
                 u.setLikes(getLikes(rs.getInt(5)));
                 u.setReports(getReports(rs.getInt(5)));
@@ -233,7 +233,7 @@ public class ControlDAO extends DAO{
     @Override
     public void sendReport(int id, String username, int type) {
         try {
-
+            
             String url = "";
             if (report(id, username)) {
                 url = "DELETE FROM report WHERE postid = ? and reporter = ? ";
@@ -313,7 +313,7 @@ public class ControlDAO extends DAO{
     @Override
     public User getUser(String username) {
         try {
-            String url = "SELECT username, password, email, name FROM user  WHERE username = ?";
+            String url = "SELECT username, password, email, name, avatar FROM user  WHERE username = ?";
             PreparedStatement statement = connection.prepareStatement(url);
             statement.setString(1, username);
             ResultSet rs = statement.executeQuery();
@@ -324,6 +324,7 @@ public class ControlDAO extends DAO{
                 u.setEmail(rs.getString(3));
                 u.setRole(getRole(username));
                 u.setName(rs.getString(4));
+                u.setImageBase64(rs.getString(5));
                 return u;
             }
         } catch (SQLException ex) {
@@ -335,7 +336,7 @@ public class ControlDAO extends DAO{
     public ArrayList<Post> getAllTweet(String suser) {
         ArrayList<Post> posts = new ArrayList<>();
         try {
-            String url = "SELECT title, content, author, type, id "
+            String url = "SELECT null, content, author, type, id "
                     + "FROM post";
             PreparedStatement statement = connection.prepareStatement(url);
 
@@ -346,7 +347,7 @@ public class ControlDAO extends DAO{
                 u.setId(rs.getInt(5));
                 u.setTitle(rs.getString(1));
                 u.setContent(rs.getString(2));
-                u.setTypename(rs.getInt(4) == 1 ? "private" : "public");
+                u.setTypename(rs.getInt(4) == 0 ? "private" : "public");
                 u.setAuthor(getUser(rs.getString(3)));
                 u.setLikes(getLikes(rs.getInt(5)));
                 u.setReports(getReports(rs.getInt(5)));
@@ -535,7 +536,7 @@ public class ControlDAO extends DAO{
                 u.setId(rs.getInt(5));
                 u.setTitle(rs.getString(1));
                 u.setContent(rs.getString(2));
-                u.setTypename(rs.getString(4));
+                u.setTypename(rs.getInt(4) == 0 ? "private" :"public");
                 u.setAuthor(getUser(rs.getString(3)));
                 u.setLikes(getLikes(rs.getInt(5)));
                 u.setReports(getReports(rs.getInt(5)));
@@ -557,7 +558,7 @@ public class ControlDAO extends DAO{
     public ArrayList<User> getFollowers(String username) {
         ArrayList<User> followers = new ArrayList<>();
         try {
-            String url = "SELECT null, f.username, f.follower, f.status, u.name, u.email FROM  follow f "
+            String url = "SELECT null, f.username, f.follower, f.status, u.name, u.email,u.avatar FROM  follow f "
                     + "INNER JOIN user u ON f.follower=u.username "
                     + " WHERE f.username=? and f.status=0";
             PreparedStatement statement = connection.prepareStatement(url);
@@ -569,6 +570,7 @@ public class ControlDAO extends DAO{
                 u.setName(rs.getString(5));
                 u.setEmail(rs.getString(6));
                 u.setUsername(rs.getString(3));
+                u.setImageBase64(rs.getString(7));
                 followers.add(u);
             }
         } catch (SQLException ex) {
@@ -677,6 +679,20 @@ public class ControlDAO extends DAO{
             Logger.getLogger(ControlDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
         return false;
+    }
+
+    public void addAvatar(String imageBase64,String username) {
+        try {
+            String url = "UPDATE user SET avatar=? WHERE username = ?";
+            PreparedStatement statement = connection.prepareStatement(url);
+            
+            statement.setString(1, imageBase64);
+            statement.setString(2, username);
+            statement.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(ControlDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
     }
 
 }

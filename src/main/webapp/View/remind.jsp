@@ -14,7 +14,7 @@
     <body>
         <script>
             alert("You must login first");
-            console.log('${requestScope.context_path}');
+            
             document.location.href="${requestScope.context_path}../user/login";
             
         </script>

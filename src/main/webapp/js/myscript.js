@@ -33,15 +33,14 @@ function  delete_tweet(id,csrf) {
     return;
 }
 function follow(username, follower, action,csrf) {
-    console.log(username + " " + follower + " " + action);
+    
     var request = new XMLHttpRequest();
     request.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
-            document.getElementById("follow").innerHTML = this.responseText;
+            document.getElementById("follow"+username).innerHTML = this.responseText;
         }
     };
     request.open("GET", "follow?username=" + username + "&follower=" + follower + "&action=" + action+"&csrf="+csrf, true);
-
     request.send();
     return;
 }

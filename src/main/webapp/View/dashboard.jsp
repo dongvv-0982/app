@@ -1,10 +1,14 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page pageEncoding="UTF-8" %>
 <!doctype html>
 <html lang="en">
 
     <head>
         <!-- Required meta tags -->
         <meta charset="utf-8">
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+        
+
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <!-- <meta http-equiv="Content-Security-Policy"
           content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' data:"> -->
@@ -20,7 +24,8 @@
         <div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom shadow-sm">
             <h5 class="my-0 mr-md-auto font-weight-normal">Cyber Links</h5>
             <nav class="my-2 my-md-0 mr-md-3">
-                <img class="rounded-circle" src="https://api.adorable.io/avatars/285/abott@adorable.png" alt=""
+                <img class="rounded-circle" src='${requestScope.user.imageBase64 == null ?"https://api.adorable.io/avatars/285/abott@adorable.png" : requestScope.user.imageBase64}'
+                                 onerror="this.src='https://api.adorable.io/avatars/285/abott@adorable.png'" alt=""
                      style="height: 32px;">
                 <a class="p-2 text-dark" href="profile">${sessionScope.user}</a>
             </nav>
@@ -42,7 +47,7 @@
 
             <div class="my-3 p-3 bg-white rounded shadow-sm">
                 <h6 class="border-bottom border-gray pb-2 mb-0">Recent links</h6>
-                <div class="media text-muted pt-3">
+<!--                <div class="media text-muted pt-3">
                     <img class="rounded-circle mr-2" src="https://api.adorable.io/avatars/285/abott@adorable.png" alt=""
                          style="height: 32px;">
                     <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
@@ -66,11 +71,12 @@
                         <br>
                         <a href="#" class="text-muted">Report</a>
                     </small>
-                </div>
+                </div>-->
                 <c:if test="${requestScope.tweets.size() > 0}">
                     <c:forEach items="${requestScope.tweets}" var="p">
                         <div class="media text-muted pt-3" id="delete${p.id}">
-                            <img class="rounded-circle mr-2" src="https://api.adorable.io/avatars/285/deptrai@adorable.png" alt=""
+                            <img class="rounded-circle mr-2" src='${p.author.imageBase64 == null ?"https://api.adorable.io/avatars/285/abott@adorable.png" : p.author.imageBase64}'
+                                 onerror="this.src='https://api.adorable.io/avatars/285/abott@adorable.png'" alt=""
                                  style="height: 32px;">
                             <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
                                 <span class="d-block text-gray-dark"><strong>

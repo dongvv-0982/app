@@ -27,6 +27,7 @@ public class Validation {
         
     }
     public String validate(String text){
+        if(text == null) return "";
         for (Character character : alter.keySet()) {
             text = text.replaceAll(character+"", alter.get(character));
         }
