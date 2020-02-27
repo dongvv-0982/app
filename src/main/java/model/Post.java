@@ -22,7 +22,16 @@ public class Post {
     private String imgUrl;
     private ArrayList<String> likes;
     private ArrayList<String> reports;
+    private String report;
     private String link;
+
+    public String getReport() {
+        return report;
+    }
+
+    public void setReport(String report) {
+        this.report = report;
+    }
 
     public String getLink() {
         return link;

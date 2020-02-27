@@ -38,8 +38,6 @@ public class Profile extends HttpServlet {
         }
         ControlDAO db = new ControlDAO();
         User user = db.getUser(username);
-        response.addHeader("X-Frame-Options", "deny");
-        response.addHeader("HttpOnly", "true");
         if(user == null) user  = db.getUser((String) request.getSession().getAttribute("user"));
         ArrayList<model.Post> tweets = db.getAllOwnedPost(username,(String) request.getSession().getAttribute("user"));
         ArrayList<User> followers = db.getFollowers(username);

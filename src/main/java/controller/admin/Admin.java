@@ -84,10 +84,11 @@ public class Admin extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         int approve = -1, id = 0;
+        String report = request.getParameter("report");
         try{
             approve = Integer.parseInt(request.getParameter("approve"));
-            
             id = Integer.parseInt(request.getParameter("id"));
+           
         } catch(NumberFormatException ex){
             response.sendError(1005,"Invalid parameter");
             
@@ -97,7 +98,7 @@ public class Admin extends HttpServlet {
         if(approve == 1) {
             int tweet_id = db.getTweetId(id);
             db.deleteReport(id);
-            db.deletePost(tweet_id);
+            db.deletePost(tweet_id,report);
         } else if (approve == 0){
             db.deleteReport(id);
         }

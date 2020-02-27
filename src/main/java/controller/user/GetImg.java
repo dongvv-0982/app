@@ -5,20 +5,22 @@
  */
 package controller.user;
 
-import dal.ControlDAO;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Scanner;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import model.Validation;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 /**
  *
  * @author root
  */
-public class Report extends HttpServlet {
+public class GetImg extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -37,10 +39,10 @@ public class Report extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet Report</title>");            
+            out.println("<title>Servlet GetImg</title>");
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet Report at " + request.getContextPath() + "</h1>");
+            out.println("<h1>Servlet GetImg at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -58,24 +60,41 @@ public class Report extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        int id = -1;
-        int error = 0;
+        String curl = request.getParameter("url");
+        String imgUrl = null;
+        String command
+                = "curl -X GET " + curl;
+        ProcessBuilder processBuilder = new ProcessBuilder(command.split(" "));
+        processBuilder.directory(new File("/home/"));
+        Process process = processBuilder.start();
+
+        Scanner s = new Scanner(process.getInputStream()).useDelimiter("\\A");
+        String result = "";
+
+        while (s.hasNext()) {
+            result += s.next();
+        }
+//                System.out.println("result : \n" + result);
+        Document doc = Jsoup.parse(result);
+        imgUrl = getImageFromUrl(curl, doc);
+        System.out.println(imgUrl);
+        response.getWriter().print("<img class='card-img-top mt-4' style='height: 200px; width: auto; max-height:100%; margin: auto; display: block; align: center' src='" + (imgUrl == null ? 1 : imgUrl) + "' alt='" + curl + "'>" );
+
+    }
+
+    private String getImageFromUrl(String url, Document doc) {
+        String imgUrl = "";
+
         try {
-            id = Integer.parseInt(request.getParameter("id").trim());
-        } catch (NumberFormatException ex) {
-            response.sendError(1001, "invalid tweet id");
+            imgUrl = doc.select("img").get(0).attr("src");
+        } catch (NullPointerException | IndexOutOfBoundsException e) {
+            imgUrl = null;
         }
-        
-        ControlDAO db = new ControlDAO();
-        String username = (String) request.getSession().getAttribute("user");
-        if (db.report(id, username)) {
-            db.sendReport(id, username, 0);
-            model.Post p = db.getTweet(id, username);
-            response.getWriter().print("<button onclick=\"report("+p.getId()+")\" style=\"color:gray\" >Report</button>");
-        } else {
-            request.setAttribute("id", id); 
-            request.getRequestDispatcher("../View/report.jsp").forward(request, response);
+        if (imgUrl != null && imgUrl.startsWith("/")) {
+            imgUrl = url.split("/")[0] + url.split("/")[1] + "//" + url.split("/")[2] + imgUrl;
         }
+       
+        return imgUrl;
     }
 
     /**
@@ -89,30 +108,7 @@ public class Report extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        int id = -1, type = -1;
-        int error = 0;
-        try {
-            id = Integer.parseInt(request.getParameter("id"));
-            type = Integer.parseInt(request.getParameter("type"));
-
-        } catch (NumberFormatException ex) {
-            response.sendError(1002, "Invalid tweet id or report type id");
-        }
-        Validation valid = new Validation();
-
-        if (!valid.isTweetId(id)) {
-            response.sendError(1003, "invalid tweet id");
-        }
-        if (!valid.isTypeId(type)) {
-            response.sendError(1004, "invalid error type id");
-        }
-
-        String username = (String) request.getSession().getAttribute("user");
-        ControlDAO db = new ControlDAO();
-        if(!db.sendReport(id, username, type))
-            response.sendError(1005, "you can not report this post");
-        else
-            response.sendRedirect(request.getHeader("Referer") == null || request.getHeader("Referer").isEmpty() ? "dashboard" : request.getHeader("Referer"));
+        response.getWriter().print("Method not Allow");
     }
 
     /**

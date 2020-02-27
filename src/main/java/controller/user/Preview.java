@@ -5,31 +5,18 @@
  */
 package controller.user;
 
-import dal.ControlDAO;
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.io.PrintWriter;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import model.Post;
-import model.User;
-import org.apache.commons.validator.UrlValidator;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 
 /**
  *
  * @author root
  */
-public class Dashboard extends HttpServlet {
+public class Preview extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -42,18 +29,7 @@ public class Dashboard extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        ControlDAO db = new ControlDAO();
-        ArrayList<Post> tweets;
-        String getAll = request.getParameter("getall");
-        String suser = (String) request.getSession().getAttribute("user");
-
-        tweets = db.getAllTweet( suser);
-
-        User user = db.getUser(suser);
-        request.setAttribute("user", user);
-
-        request.setAttribute("tweets", tweets);
-        request.getRequestDispatcher("../View/dashboard.jsp").forward(request, response);
+        
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -94,7 +70,5 @@ public class Dashboard extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
-
-    
 
 }

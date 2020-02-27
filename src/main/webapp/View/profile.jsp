@@ -15,7 +15,8 @@
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
               integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
         <script src="../js/myscript.js" type="text/javascript"></script>
-        
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js" type="text/javascript"></script>
+
         <title>Cyber Links</title>
     </head>
 
@@ -25,7 +26,7 @@
             <h5 class="my-0 mr-md-auto font-weight-normal"><a href="dashboard">Cyber Links</a></h5>
             <nav class="my-2 my-md-0 mr-md-3">
                 <img class="rounded-circle" src='${requestScope.user.imageBase64 == null ?"https://api.adorable.io/avatars/285/abott@adorable.png" : requestScope.user.imageBase64}'
-                                 onerror="this.src='https://api.adorable.io/avatars/285/abott@adorable.png'" alt=""
+                     onerror="this.src='https://api.adorable.io/avatars/285/abott@adorable.png'" alt=""
                      style="height: 32px;">
                 <a class="p-2 text-dark" href="profile">${sessionScope.user}</a>
             </nav>
@@ -50,15 +51,15 @@
                                 if (!user.getUsername().equals(suser)) {%>
                             <div id="follow">
                                 <%if (db.isFollow(user.getUsername(), suser)) {%>
-                                <button class="btn btn-outline-primary" onclick="follow('<%=user.getUsername()%>','<%=suser%>',1,'${sessionScope.csrf}')">Waiting</button>
+                                <button class="btn btn-outline-primary" onclick="follow('<%=user.getUsername()%>', '<%=suser%>', 1, '${sessionScope.csrf}')">Waiting</button>
                                 <%} else if (db.isFollowed(user.getUsername(), suser)) {%>
 
-                                <button class="btn btn-outline-primary" onclick="follow('<%=user.getUsername()%>','<%=suser%>',1,'${sessionScope.csrf}')">Followed</button>
+                                <button class="btn btn-outline-primary" onclick="follow('<%=user.getUsername()%>', '<%=suser%>', 1, '${sessionScope.csrf}')">Followed</button>
                                 <%} else {%>
-                                <button class="btn btn-outline-primary" onclick="follow('<%=user.getUsername()%>','<%=suser%>',0,'${sessionScope.csrf}')">Follow</button>
+                                <button class="btn btn-outline-primary" onclick="follow('<%=user.getUsername()%>', '<%=suser%>', 0, '${sessionScope.csrf}')">Follow</button>
                                 <%}%>
                             </div>
-                            <%} else{%>
+                            <%} else {%>
                             <a href="upload" class="btn btn-outline-primary">Update Avatar</a>
                             <%}%>
 
@@ -72,8 +73,8 @@
                                     <div class="d-flex flex-row mb-2 justify-content-between" id="follow${u.username}">
                                         <div class="text-left col-6">${u.name} @${u.username}</div>
                                         <div class="col-6 d-flex flex-row justify-content-end">
-                                            <button class="btn-sm mr-2 btn-primary" onclick="follow('<%=suser%>','${u.username}', 2,'${sessionScope.csrf}')">Approve</button>
-                                            <button class="btn-sm btn-danger" onclick="follow('<%=suser%>','${u.username}', 3,'${sessionScope.csrf}')">Reject</button>
+                                            <button class="btn-sm mr-2 btn-primary" onclick="follow('<%=suser%>', '${u.username}', 2, '${sessionScope.csrf}')">Approve</button>
+                                            <button class="btn-sm btn-danger" onclick="follow('<%=suser%>', '${u.username}', 3, '${sessionScope.csrf}')">Reject</button>
                                         </div>
                                     </div>
                                 </c:forEach>
@@ -90,32 +91,70 @@
                             <h6 class="border-bottom border-gray pb-2 mb-0">Recent links</h6>
                             <c:if test="${requestScope.tweets.size() > 0}">
                                 <c:forEach items="${requestScope.tweets}" var="p">
-                                    <div class="media text-muted pt-3">
-                                        <img class="rounded-circle mr-2" src='${requestScope.user.imageBase64 == null ?"https://api.adorable.io/avatars/285/abott@adorable.png" : requestScope.user.imageBase64}'
-                                 onerror="this.src='https://api.adorable.io/avatars/285/abott@adorable.png'" alt=""
+                                    <div class="media text-muted pt-3" id="delete${p.id}">
+                                        <img class="rounded-circle mr-2" src='${p.author.imageBase64 == null ?"https://api.adorable.io/avatars/285/abott@adorable.png" : p.author.imageBase64}'
+                                             onerror="this.src='https://api.adorable.io/avatars/285/abott@adorable.png'" alt=""
                                              style="height: 32px;">
-                                        <p class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
+                                        <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
                                             <span class="d-block text-gray-dark"><strong>
-                                                    ${p.author.name}</strong><span>&nbsp;<a href="profile?username=${p.author.username}">@${p.author.username}</a></span></span>
-                                                    ${p.content}
-                                        </p>
-                                        <small class="ml-2">
-                                            <div id="tweet${p.id}">
-                                                <button onclick="like(${p.id})" style="color:${p.likes.contains(sessionScope.user)? 'blue' : 'gray'}" >${p.likes.size()} likes</button>
-                                            </div>
-                                            <div id="report${p.id}">
-                                                <c:choose>
+                                                    ${p.author.name}</strong><span>&nbsp;@<a href="profile?username=${p.author.username}">${p.author.username}</a></span></span>
+                                                    <c:if test="${p.report == null}">
 
-                                                    <c:when test="${p.containr(sessionScope.user)}">
-                                                        <button onclick="report(${p.id})" style="color:red" >Reported</button>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <button onclick="report(${p.id})" style="color:gray" >Report</button>
-                                                    </c:otherwise>
+                                                <span>${p.content == null ? "POST DELETED" : p.content}</span>
+                                            </c:if>
+                                            <c:if test="${p.report == 'SPAM' || p.report == 'BROKEN LINK' || p.report == 'INAPPROPRIATE CONTENT'}">
+                                                <span>${p.content}</span>
+                                                <span style="color:red">MARK AS${p.report}</span>
+                                            </c:if>
 
-                                                </c:choose>
-                                            </div>
-                                        </small>
+
+
+                                            <c:if test="${p.link != null}">
+
+                                                <br>
+                                                <div class="card mt-2" id="preview${p.id}" onload="alert(1)">
+                                                    <div id="img${p.id}"></div>
+                                                    <div id="description${p.id}"></div>
+                                                    <!--getImg('${p.link}',${p.id});getDescription('${p.link}',${p.id});-->
+                                                </div>
+                                                <script>
+                                        $('#preview${p.id}').ready(function () {
+                                            getImg('${p.link}',${p.id});
+                                            getDescription('${p.link}',${p.id});
+
+
+                                        });
+                                                </script>
+                                            </c:if>
+                                        </div>
+                                        <c:if test="${p.content != null}">
+                                            <small class="ml-2">
+                                                <div id="tweet${p.id}">
+                                                    <button onclick="like(${p.id})" style="color:${p.likes.contains(sessionScope.user)? 'blue' : 'gray'}" >${p.likes.size()} likes</button>
+                                                </div>
+                                                <br>
+                                                <div id="report${p.id}">
+                                                    <c:choose>
+
+                                                        <c:when test="${p.containr(sessionScope.user)}">
+                                                            <button onclick="report(${p.id})" style="color:red" >Reported</button>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <button onclick="report(${p.id})" style="color:gray" >Report</button>
+                                                        </c:otherwise>
+
+                                                    </c:choose>
+                                                </div>
+                                                <c:if test="${p.author.username == sessionScope.user}">
+                                                    <div>
+                                                        <button onclick="delete_tweet(${p.id}, '${sessionScope.csrf}')" style="color:red" >Delete</button>
+                                                    </div>
+                                                </c:if>
+
+                                            </small>
+                                        </c:if>
+
+
                                     </div>
                                 </c:forEach>
                             </c:if>

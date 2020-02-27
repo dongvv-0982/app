@@ -38,9 +38,11 @@ public class Like extends HttpServlet {
 
             ControlDAO db = new ControlDAO();
            
-            db.likeTweet(id, username);
+            
             model.Post p = db.getTweet(id,username);
             if (p != null) {
+                db.likeTweet(id, username);
+                p = db.getTweet(id,username);
                 String color = p.containl((String)request.getSession().getAttribute("user"))? "blue" : "gray";
                 response.getWriter().print("<button onclick=\"like(" + id + ")\" style=\"color:"+color+"\" id=\"tweet" + id + "\">"+p.getLikes().size()+" likes</button>");
             } else {

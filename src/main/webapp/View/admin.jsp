@@ -57,6 +57,7 @@
                             <td>
                                 <form method="POST" id="assessment" hidden="true">
                                     <input type="hidden" value="${r.id}" name="id">
+                                    <input type="hidden" value="${r.type}" name="report">
                                     <input type="hidden" value="" id="approve" name="approve">
                                 </form>
                                     <a  onclick="approveFrom(1)">Approve</a>
@@ -73,6 +74,7 @@
         <script>
             function approveFrom(id){
                 document.getElementById("approve").value = id;
+               
                 document.getElementById("assessment").submit();
             }
         </script>

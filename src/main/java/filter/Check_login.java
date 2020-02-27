@@ -69,6 +69,10 @@ public class Check_login implements Filter {
     
     private void doAfterProcessing(ServletRequest request, ServletResponse response)
             throws IOException, ServletException {
+        HttpServletResponse httpResponse = (HttpServletResponse) response;
+        httpResponse.addHeader("X-Frame-Options", "deny");
+        httpResponse.addHeader("Content-Type", "application/javascript; charset=utf-8");
+        httpResponse.addHeader("HttpOnly", "true");
         if (debug) {
             log("Check_login:DoAfterProcessing");
         }

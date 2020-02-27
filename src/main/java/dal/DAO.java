@@ -36,12 +36,12 @@ public abstract class DAO {
     
     public abstract boolean addUser(String username, String password, String email, String name);
     public abstract String login(String username, String password);
-    public abstract void uploadTweet(String username,  String content, int type);
+    public abstract void uploadTweet(String username,  String content, int type, String link);
     public abstract Post getTweet(int id,String suser);
     public abstract ArrayList<Post> get10Tweet(int index, String suser);
     public abstract void likeTweet(int postid, String username);
     public abstract void comment(int postid, String username, String content);
-    public abstract void sendReport(int id, String username, int type);
+    public abstract boolean  sendReport(int id, String username, int type);
     public abstract Role getRole(String username);
     public abstract User getUser(String username);
     public abstract void follow(String username, String followedUser);

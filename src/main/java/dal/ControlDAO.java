@@ -22,8 +22,8 @@ import model.User;
  *
  * @author root
  */
-public class ControlDAO extends DAO{
-    
+public class ControlDAO extends DAO {
+
     Connection connection;
 
     public ControlDAO() {
@@ -74,15 +74,16 @@ public class ControlDAO extends DAO{
     }
 
     @Override
-    public void uploadTweet(String username, String content, int type) {
+    public void uploadTweet(String username, String content, int type, String link) {
         try {
-            String url = "INSERT INTO post(content, author, type) "
-                    + "VALUES(?,?,?);";
+            String url = "INSERT INTO post(content, author, type, link) "
+                    + "VALUES(?,?,?,?);";
             PreparedStatement statement = connection.prepareStatement(url);
             
             statement.setString(1, content);
             statement.setString(2, username);
             statement.setInt(3, type);
+            statement.setString(4, link);
             statement.executeUpdate();
 
         } catch (SQLException ex) {
@@ -94,7 +95,7 @@ public class ControlDAO extends DAO{
     @Override
     public Post getTweet(int id, String suser) {
         try {
-            String url = "SELECT null, content, author, type, id "
+            String url = "SELECT null, content, author, type, id, reportid "
                     + "FROM post WHERE id = ?";
             PreparedStatement statement = connection.prepareStatement(url);
             statement.setInt(1, id);
@@ -109,7 +110,7 @@ public class ControlDAO extends DAO{
                 u.setAuthor(getUser(rs.getString(3)));
                 u.setLikes(getLikes(rs.getInt(5)));
                 u.setReports(getReports(rs.getInt(5)));
-                
+                u.setReport(rs.getString(6));
                 if (u.getTypename().equals("private")) {
                     String username = u.getAuthor().getUsername();
                     if (isFollowed(username, suser) || username.equals(suser)) {
@@ -132,7 +133,7 @@ public class ControlDAO extends DAO{
     public ArrayList<Post> get10Tweet(int index, String suser) {
         ArrayList<Post> posts = new ArrayList<>();
         try {
-            String url = "SELECT null, content, author, type, id "
+            String url = "SELECT null, content, author, type, id, reportid, link "
                     + "FROM post ORDER BY time_create DESC ";
             PreparedStatement statement = connection.prepareStatement(url);
 
@@ -147,6 +148,8 @@ public class ControlDAO extends DAO{
                 u.setAuthor(getUser(rs.getString(3)));
                 u.setLikes(getLikes(rs.getInt(5)));
                 u.setReports(getReports(rs.getInt(5)));
+                u.setReport(rs.getString(6));
+                u.setLink(rs.getString(7));
                 if (u.getTypename().equals("private")) {
                     String username = u.getAuthor().getUsername();
                     if (isFollowed(username, suser) || username.equals(suser)) {
@@ -155,8 +158,9 @@ public class ControlDAO extends DAO{
                 } else {
                     posts.add(u);
                 }
-                if(posts.size() == 10)
+                if (posts.size() == 10) {
                     break;
+                }
 
             }
         } catch (SQLException ex) {
@@ -230,10 +234,24 @@ public class ControlDAO extends DAO{
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    private boolean isLegal(String user, String suser, Post u) {
+        if (u.getTypename().equals("private")) {
+            String username = u.getAuthor().getUsername();
+            if (isFollowed(username, suser) || username.equals(suser)) {
+                return true;
+            }
+        } else {
+            return false;
+        }
+        return true;
+    }
+
     @Override
-    public void sendReport(int id, String username, int type) {
+    public boolean sendReport(int id, String username, int type) {
         try {
-            
+            Post p = getTweet(id, username);
+            if(p == null)
+                return false;
             String url = "";
             if (report(id, username)) {
                 url = "DELETE FROM report WHERE postid = ? and reporter = ? ";
@@ -248,9 +266,10 @@ public class ControlDAO extends DAO{
                 statement.setInt(3, type);
             }
             statement.executeUpdate();
-
+            return true;
         } catch (SQLException ex) {
             Logger.getLogger(ControlDAO.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
         }
     }
 
@@ -313,7 +332,8 @@ public class ControlDAO extends DAO{
     @Override
     public User getUser(String username) {
         try {
-            String url = "SELECT username, password, email, name, avatar FROM user  WHERE username = ?";
+            String url = "SELECT username, password, email, name, avatar FROM user  WHERE username = ?"
+                    + " ";
             PreparedStatement statement = connection.prepareStatement(url);
             statement.setString(1, username);
             ResultSet rs = statement.executeQuery();
@@ -336,10 +356,9 @@ public class ControlDAO extends DAO{
     public ArrayList<Post> getAllTweet(String suser) {
         ArrayList<Post> posts = new ArrayList<>();
         try {
-            String url = "SELECT null, content, author, type, id "
-                    + "FROM post";
+            String url = "SELECT null, content, author, type, id, reportid, link "
+                    + "FROM post ORDER BY time_create DESC";
             PreparedStatement statement = connection.prepareStatement(url);
-
             ResultSet rs = statement.executeQuery();
 
             while (rs.next()) {
@@ -351,6 +370,8 @@ public class ControlDAO extends DAO{
                 u.setAuthor(getUser(rs.getString(3)));
                 u.setLikes(getLikes(rs.getInt(5)));
                 u.setReports(getReports(rs.getInt(5)));
+                u.setReport(rs.getString(6));
+                u.setLink(rs.getString(7));
                 if (u.getTypename().equals("private")) {
                     String username = u.getAuthor().getUsername();
                     if (isFollowed(username, suser) || username.equals(suser)) {
@@ -441,7 +462,7 @@ public class ControlDAO extends DAO{
                 r.setAuthor(rs.getString(3));
                 r.setContent(rs.getString(4));
                 r.setReporter(rs.getString(2));
-                r.setType(rs.getString(5));
+                r.setType(reportTypes.get(Integer.parseInt(rs.getString(5))));
                 reports.add(r);
 
             }
@@ -465,15 +486,16 @@ public class ControlDAO extends DAO{
 
     }
 
-    public void deletePost(int id) {
+    public void deletePost(int id, String report) {
         deleteComment(id);
         deleteLike(id);
         try {
-            String url = "DELETE FROM post WHERE id = ?";
+            String url = "UPDATE  post SET content=null, link=null, reportid=? WHERE id = ?";
             PreparedStatement statement = connection.prepareStatement(url);
-            statement.setInt(1, id);
+            statement.setInt(2, id);
+            statement.setString(1, report);
             statement.executeUpdate();
-
+            
         } catch (SQLException ex) {
             Logger.getLogger(ControlDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -524,7 +546,7 @@ public class ControlDAO extends DAO{
     public ArrayList<Post> getAllOwnedPost(String username, String suser) {
         ArrayList<Post> posts = new ArrayList<>();
         try {
-            String url = "SELECT null, content, author, type, id "
+            String url = "SELECT null, content, author, type, id,reportid, link "
                     + "FROM post "
                     + " WHERE author=?";
             PreparedStatement statement = connection.prepareStatement(url);
@@ -536,10 +558,12 @@ public class ControlDAO extends DAO{
                 u.setId(rs.getInt(5));
                 u.setTitle(rs.getString(1));
                 u.setContent(rs.getString(2));
-                u.setTypename(rs.getInt(4) == 0 ? "private" :"public");
+                u.setTypename(rs.getInt(4) == 0 ? "private" : "public");
                 u.setAuthor(getUser(rs.getString(3)));
                 u.setLikes(getLikes(rs.getInt(5)));
                 u.setReports(getReports(rs.getInt(5)));
+                u.setReport(rs.getString(6));
+                u.setLink(rs.getString(7));
                 if (u.getTypename().equals("private")) {
                     if (isFollowed(username, suser) || username.equals(suser)) {
                         posts.add(u);
@@ -667,11 +691,10 @@ public class ControlDAO extends DAO{
         }
     }
 
-    public boolean deleteTweet(int id,String username) {
+    public boolean deleteTweet(int id, String username) {
         try {
-            String url = "DELETE FROM   post WHERE id=? and author=?";
+            String url = "UPDATE post set content=null, reportid=null,link=null WHERE id=? and author=?";
             PreparedStatement statement = connection.prepareStatement(url);
-            
             statement.setInt(1, id);
             statement.setString(2, username);
             return statement.executeUpdate() != 0;
@@ -681,18 +704,18 @@ public class ControlDAO extends DAO{
         return false;
     }
 
-    public void addAvatar(String imageBase64,String username) {
+    public void addAvatar(String imageBase64, String username) {
         try {
             String url = "UPDATE user SET avatar=? WHERE username = ?";
             PreparedStatement statement = connection.prepareStatement(url);
-            
+
             statement.setString(1, imageBase64);
             statement.setString(2, username);
             statement.executeUpdate();
         } catch (SQLException ex) {
             Logger.getLogger(ControlDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
     }
 
 }

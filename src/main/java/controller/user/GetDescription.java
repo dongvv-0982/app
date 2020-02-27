@@ -5,20 +5,25 @@
  */
 package controller.user;
 
-import dal.ControlDAO;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
+import java.util.Scanner;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import model.Validation;
+import static javax.swing.text.html.HTML.Attribute.CODE;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 /**
  *
  * @author root
  */
-public class Report extends HttpServlet {
+public class GetDescription extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -37,10 +42,10 @@ public class Report extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet Report</title>");            
+            out.println("<title>Servlet GetDescription</title>");
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet Report at " + request.getContextPath() + "</h1>");
+            out.println("<h1>Servlet GetDescription at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -58,24 +63,51 @@ public class Report extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        int id = -1;
-        int error = 0;
+        String curl = request.getParameter("url");
+        String text = null;
+        String command
+                = "curl -X GET " + curl;
+        ProcessBuilder processBuilder = new ProcessBuilder(command.split(" "));
+        processBuilder.directory(new File("/home/"));
+        Process process = processBuilder.start();
+
+        Scanner s = new Scanner(process.getInputStream()).useDelimiter("\\A");
+        String result = "";
+
+        while (s.hasNext()) {
+            result += s.next();
+        }
+//                System.out.println("result : \n" + result);
+        Document doc = Jsoup.parse(result);
+        text = getHtmlText(curl, doc);
+//        response.getWriter().print("<div class='card-body'> <a href='" + curl + "' style='color: inherit;'><p class='card-text'>" + (text == null ? curl : text) + "</p></a></div>");
+        response.setContentType("text/html; charset=UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        PrintWriter out = response.getWriter();
+        out.println("<div class='card-body'> <a href='" + curl + "' style='color: inherit;'><p class='card-text'>" + (text == null ? curl : text) + "</p></a></div>");
+        out.close();
+    }
+
+    private String getHtmlText(String url, Document doc) {
+
+        String desContent;
         try {
-            id = Integer.parseInt(request.getParameter("id").trim());
-        } catch (NumberFormatException ex) {
-            response.sendError(1001, "invalid tweet id");
+            desContent = doc.select("meta[name=Description]").get(0).attr("content");
+        } catch (IndexOutOfBoundsException ex) {
+            try {
+                desContent = doc.select("p").first().text();
+            } catch (NullPointerException exx) {
+                desContent = null;
+            }
         }
-        
-        ControlDAO db = new ControlDAO();
-        String username = (String) request.getSession().getAttribute("user");
-        if (db.report(id, username)) {
-            db.sendReport(id, username, 0);
-            model.Post p = db.getTweet(id, username);
-            response.getWriter().print("<button onclick=\"report("+p.getId()+")\" style=\"color:gray\" >Report</button>");
+        String x;
+        if (desContent == null) {
+            x = url;
         } else {
-            request.setAttribute("id", id); 
-            request.getRequestDispatcher("../View/report.jsp").forward(request, response);
+            x = new String(desContent.getBytes(), Charset.forName("UTF-8"));
         }
+
+        return x;
     }
 
     /**
@@ -89,30 +121,7 @@ public class Report extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        int id = -1, type = -1;
-        int error = 0;
-        try {
-            id = Integer.parseInt(request.getParameter("id"));
-            type = Integer.parseInt(request.getParameter("type"));
-
-        } catch (NumberFormatException ex) {
-            response.sendError(1002, "Invalid tweet id or report type id");
-        }
-        Validation valid = new Validation();
-
-        if (!valid.isTweetId(id)) {
-            response.sendError(1003, "invalid tweet id");
-        }
-        if (!valid.isTypeId(type)) {
-            response.sendError(1004, "invalid error type id");
-        }
-
-        String username = (String) request.getSession().getAttribute("user");
-        ControlDAO db = new ControlDAO();
-        if(!db.sendReport(id, username, type))
-            response.sendError(1005, "you can not report this post");
-        else
-            response.sendRedirect(request.getHeader("Referer") == null || request.getHeader("Referer").isEmpty() ? "dashboard" : request.getHeader("Referer"));
+        processRequest(request, response);
     }
 
     /**

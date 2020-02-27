@@ -108,6 +108,18 @@
         <servlet-name>Testupload</servlet-name>
         <servlet-class>controller.user.Testupload</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>Preview</servlet-name>
+        <servlet-class>controller.user.Preview</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>GetImg</servlet-name>
+        <servlet-class>controller.user.GetImg</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>GetDescription</servlet-name>
+        <servlet-class>controller.user.GetDescription</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>Admin</servlet-name>
         <url-pattern>/admin/home</url-pattern>
@@ -159,6 +171,18 @@
     <servlet-mapping>
         <servlet-name>Testupload</servlet-name>
         <url-pattern>/user/upload</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Preview</servlet-name>
+        <url-pattern>/user/preview</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>GetImg</servlet-name>
+        <url-pattern>/user/getImg</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>GetDescription</servlet-name>
+        <url-pattern>/user/description</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

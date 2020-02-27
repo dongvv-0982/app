@@ -19,10 +19,10 @@ public class Validation {
     private HashMap<Character, String> alter = new HashMap<>();
     public Validation() {
         
-        alter.put('&', "&amp");
-        alter.put('<', "&lt");
-        alter.put('"', "&quot");
-        alter.put('\'', "&#x27");
+//        alter.put('&', "&amp;");
+        alter.put('<', "&lt;");
+        alter.put('"', "&quot;");
+        alter.put('\'', "&#x27;");
 //        alter.put('/', "&#x2F");
         
     }
